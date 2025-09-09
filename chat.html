@@ -1,0 +1,128 @@
+<!-- templates/chat.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Château Napa Valley - Wine Assistant</title>
+    <style>
+        body { 
+            font-family: 'Georgia', serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f8f6f2;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #8B0000;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #8B0000;
+            margin: 0;
+        }
+        .chat-container { 
+            border: 2px solid #8B0000; 
+            border-radius: 10px; 
+            padding: 20px; 
+            background-color: white;
+        }
+        .messages { 
+            height: 400px; 
+            overflow-y: auto; 
+            margin-bottom: 20px; 
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .message { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border-radius: 5px; 
+            max-width: 80%;
+        }
+        .user { 
+            background-color: #e8f4f8; 
+            margin-left: auto; 
+            text-align: right;
+        }
+        .assistant { 
+            background-color: #8B0000; 
+            color: white; 
+            margin-right: auto;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] { 
+            flex: 1; 
+            padding: 12px; 
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button { 
+            padding: 12px 24px; 
+            background-color: #8B0000; 
+            color: white; 
+            border: none; 
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍷 Château Napa Valley Wine Assistant</h1>
+        <p>Ask me about our wines, hours, or Napa Valley weather!</p>
+    </div>
+    
+    <div class="chat-container">
+        <div class="messages" id="messages">
+            <div class="message assistant">
+                Welcome! I can help you with information about our wines, tasting hours, 
+                weather in Napa Valley, and more. What would you like to know?
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Ask about our wines..." onkeypress="if(event.key=='Enter') sendMessage()">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function addMessage(text, isUser) {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            messageDiv.textContent = text;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage(message, true);
+                input.value = '';
+                
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: message })
+                    });
+                    
+                    const data = await response.json();
+                    addMessage(data.response, false);
+                } catch (error) {
+                    addMessage("Sorry, I'm having connection issues. Please try again.", false);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
